@@ -1,0 +1,29 @@
+{
+  "name": "emergency-issue-handler",
+  "version": "1.0.0",
+  "description": "Example demonstrating how to handle critical emergency issues using the Linear SDK",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node index.ts",
+    "dev": "ts-node-dev index.ts"
+  },
+  "dependencies": {
+    "@linear/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "dotenv": "^16.0.0",
+    "ts-node": "^10.9.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "linear",
+    "emergency",
+    "incident",
+    "issue-tracking"
+  ],
+  "author": "",
+  "license": "MIT"
+}

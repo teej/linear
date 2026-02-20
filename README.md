@@ -85,6 +85,17 @@ pnpm changeset
 <br/>
 <!-- TEXT_SECTION:contribute:END -->
 
+<!-- TEXT_SECTION:examples:START -->
+## Examples
+
+Example applications demonstrating Linear SDK usage can be found in the [examples](./examples) directory:
+
+- [emergency-issue-handler](./examples/emergency-issue-handler) - Handle critical incidents and emergency issues with priority tracking
+- [nextjs-file-upload](./examples/nextjs-file-upload) - Upload files and attachments to Linear issues using Next.js
+
+<br/>
+<!-- TEXT_SECTION:examples:END -->
+
 <!-- TEXT_SECTION:license:START -->
 ## License
 
