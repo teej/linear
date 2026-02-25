@@ -40,7 +40,6 @@
 If you are looking for documentation on the Linear SDK or Linear API, visit [**developers.linear.app**](https://developers.linear.app/docs) instead.
 
 <!-- TEXT_SECTION:contribute:START -->
-The Linear Client uses custom [GraphQL Code Generator](https://graphql-code-generator.com/) plugins to produce a typed SDK for all operations and models exposed by the Linear production API.
 
 ### Structure
 
