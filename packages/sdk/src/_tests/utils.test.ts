@@ -1,6 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { serializeUserAgent } from "../utils.js";
 
+describe("math", () => {
+  it("2+2=4", () => {
+    expect(2 + 2).toEqual(4);
+  });
+});
+
 describe("serializeUserAgent", () => {
   it("handles empty", async () => {
     const result = serializeUserAgent({});
