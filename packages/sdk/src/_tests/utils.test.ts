@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { serializeUserAgent } from "../utils.js";
+import { add, serializeUserAgent } from "../utils.js";
+
+describe("add", () => {
+  it("adds two numbers", () => {
+    expect(add(2, 2)).toEqual(4);
+  });
+});
 
 describe("serializeUserAgent", () => {
   it("handles empty", async () => {

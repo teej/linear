@@ -21,6 +21,17 @@ export function capitalize(str?: string): string | undefined {
 }
 
 /**
+ * Add two numbers together
+ *
+ * @param a first number
+ * @param b second number
+ * @returns the sum of a and b
+ */
+export function add(a: number, b: number): number {
+  return a + b;
+}
+
+/**
  * Type safe check for non defined values
  */
 export function nonNullable<Type>(value: Type): value is NonNullable<Type> {
