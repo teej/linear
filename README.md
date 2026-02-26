@@ -35,12 +35,17 @@
 
 <br/>
 
-## ⚠️ Monorepo Readme
+## What is this?
 
-If you are looking for documentation on the Linear SDK or Linear API, visit [**developers.linear.app**](https://developers.linear.app/docs) instead.
+This monorepo contains the source for Linear's open source developer tooling:
+
+- **[@linear/sdk](./packages/sdk)** — A type-safe TypeScript client for the [Linear GraphQL API](https://developers.linear.app/docs), auto-generated from the production schema
+- **[@linear/import](./packages/import)** — A CLI for importing issues into Linear from GitHub, Jira, Asana, Trello, and other platforms
+- **Code generation plugins** (`codegen-doc`, `codegen-sdk`, `codegen-test`) — Custom [GraphQL Code Generator](https://graphql-code-generator.com/) plugins that produce the typed SDK, its fragments/documents, and tests
+
+For documentation on using the SDK or API, visit [**developers.linear.app**](https://developers.linear.app/docs).
 
 <!-- TEXT_SECTION:contribute:START -->
-The Linear Client uses custom [GraphQL Code Generator](https://graphql-code-generator.com/) plugins to produce a typed SDK for all operations and models exposed by the Linear production API.
 
 ### Structure
 
