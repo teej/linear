@@ -14,7 +14,6 @@
   Streamline issues, projects, and product roadmaps<br/>
   with the system for modern software development.
 </p>
-<p align="center">
   <a href="https://github.com/linear/linear/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Linear is released under the MIT license." />
   </a>
