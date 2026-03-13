@@ -1,11 +1,11 @@
 <!-- TEXT_SECTION:header:START -->
 <p align="center">
   <a href="https://linear.app" target="_blank" rel="noopener noreferrer">
-    <img width="64" src="https://raw.githubusercontent.com/linear/linear/master/docs/logo.svg" alt="Linear logo">
+    <img width="64" src="https://raw.githubusercontent.com/linear/linear/master/docs/logo.svg" alt="Exponential logo">
   </a>
 </p>
 <h1 align="center">
-  Linear API
+  Exponential API
 </h1>
 <h3 align="center">
   The purpose-built tool for planning and building products
@@ -16,7 +16,7 @@
 </p>
 <p align="center">
   <a href="https://github.com/linear/linear/blob/master/LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Linear is released under the MIT license." />
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Exponential is released under the MIT license." />
   </a>
   <a href="https://github.com/linear/linear/actions/workflows/build.yaml">
     <img src="https://github.com/linear/linear/actions/workflows/build.yaml/badge.svg" alt="Build github action status." />
@@ -37,10 +37,10 @@
 
 ## ⚠️ Monorepo Readme
 
-If you are looking for documentation on the Linear SDK or Linear API, visit [**developers.linear.app**](https://developers.linear.app/docs) instead.
+If you are looking for documentation on the Exponential SDK or Exponential API, visit [**developers.linear.app**](https://developers.linear.app/docs) instead.
 
 <!-- TEXT_SECTION:contribute:START -->
-The Linear Client uses custom [GraphQL Code Generator](https://graphql-code-generator.com/) plugins to produce a typed SDK for all operations and models exposed by the Linear production API.
+The Exponential Client uses custom [GraphQL Code Generator](https://graphql-code-generator.com/) plugins to produce a typed SDK for all operations and models exposed by the Exponential production API.
 
 ### Structure
 
@@ -49,7 +49,7 @@ This monorepo uses `pnpm` workspaces to manage and publish packages.
 Generated code uses file prefix `_generated` and should never be manually updated.
 
 Open source packages:
-- [sdk](https://github.com/linear/linear/tree/master/packages/sdk/README.md) - The Linear Client SDK for interacting with the Linear GraphQL API
+- [sdk](https://github.com/linear/linear/tree/master/packages/sdk/README.md) - The Exponential Client SDK for interacting with the Exponential GraphQL API
 - [import](https://github.com/linear/linear/tree/master/packages/import/README.md) - Import tooling for uploading from other systems
 - [codegen-doc](https://github.com/linear/linear/tree/master/packages/codegen-doc/README.md) - GraphQL codegen plugin to generate GraphQL fragments and documents
 - [codegen-sdk](https://github.com/linear/linear/tree/master/packages/codegen-sdk/README.md) - GraphQL codegen plugin to generate Typescript SDK from fragments and documents
@@ -79,7 +79,7 @@ pnpm changeset
 ### Plugin Flow
 
 1. The [@linear/codegen-doc](https://github.com/linear/linear/tree/master/packages/codegen-doc/README.md) plugin is used by [codegen.doc.yml](https://github.com/linear/linear/tree/master/packages/sdk/codegen.doc.yml) to generate [fragments and documents](https://github.com/linear/linear/tree/master/packages/sdk/src/_generated_documents.graphql)
-2. The [@linear/codegen-sdk](https://github.com/linear/linear/tree/master/packages/codegen-sdk/README.md) plugin is used by [codegen.sdk.yml](https://github.com/linear/linear/tree/master/packages/sdk/codegen.sdk.yml) to generate the typed [Linear SDK](https://github.com/linear/linear/tree/master/packages/sdk/src/_generated_sdk.ts)
+2. The [@linear/codegen-sdk](https://github.com/linear/linear/tree/master/packages/codegen-sdk/README.md) plugin is used by [codegen.sdk.yml](https://github.com/linear/linear/tree/master/packages/sdk/codegen.sdk.yml) to generate the typed [Exponential SDK](https://github.com/linear/linear/tree/master/packages/sdk/src/_generated_sdk.ts)
 3. The [@linear/codegen-test](https://github.com/linear/linear/tree/master/packages/codegen-test/README.md) plugin is used by [codegen.test.yml](https://github.com/linear/linear/tree/master/packages/sdk/codegen.test.yml) to generate a typed [jest test](https://github.com/linear/linear/tree/master/packages/sdk/src/_tests/_generated.test.ts)
 
 <br/>
