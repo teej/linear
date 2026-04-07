@@ -30,6 +30,8 @@ export interface Issue {
   archived?: boolean;
   /** Issue estimate */
   estimate?: number;
+  /** Unique identifier from the source system (e.g. external issue ID). Used for deduplication across imports. */
+  sourceId?: string;
 }
 
 /** Issue comment */
