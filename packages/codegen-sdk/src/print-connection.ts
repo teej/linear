@@ -196,6 +196,22 @@ export function printConnection(): string {
         }
       }
 
+      ${printComment(["Async iterator to allow \`for await (const node of connection)\` syntax", "Yields all nodes in the current page, then fetches subsequent pages"])}
+      public async *[Symbol.asyncIterator](): AsyncIterableIterator<${Sdk.NODE_TYPE}> {
+        if (this.${Sdk.NODE_NAME}) {
+          yield* this.${Sdk.NODE_NAME}
+        }
+        while (this.${Sdk.PAGEINFO_NAME}?.hasNextPage) {
+          const ${Sdk.RESPONSE_NAME} = await this._${Sdk.FETCH_NAME}({
+            ${Sdk.CONNECTION_AFTER}: this.${Sdk.PAGEINFO_NAME}?.endCursor
+          })
+          if (${Sdk.RESPONSE_NAME}?.${Sdk.NODE_NAME}) {
+            yield* ${Sdk.RESPONSE_NAME}.${Sdk.NODE_NAME}
+          }
+          this._appendPageInfo(${Sdk.RESPONSE_NAME}?.${Sdk.PAGEINFO_NAME})
+        }
+      }
+
       ${printComment(["Fetch the next page of results and append to nodes"])}
       public async ${Sdk.FETCH_NAME}Next(): Promise<this> {
         if (this.${Sdk.PAGEINFO_NAME}?.hasNextPage) {
