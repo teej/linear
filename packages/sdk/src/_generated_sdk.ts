@@ -126,6 +126,18 @@ export class Connection<Node> extends LinearConnection<Node> {
     }
   }
 
+  /** Async iterator to enable `for await (const node of connection)` syntax */
+  public async *[Symbol.asyncIterator](): AsyncIterableIterator<Node> {
+    yield* this.nodes;
+    while (this.pageInfo?.hasNextPage) {
+      const previousLength = this.nodes.length;
+      await this.fetchNext();
+      for (let i = previousLength; i < this.nodes.length; i++) {
+        yield this.nodes[i];
+      }
+    }
+  }
+
   /** Fetch the next page of results and append to nodes */
   public async fetchNext(): Promise<this> {
     if (this.pageInfo?.hasNextPage) {
