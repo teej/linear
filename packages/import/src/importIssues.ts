@@ -2,15 +2,39 @@
 import { LinearClient } from "@linear/sdk";
 import chalk from "chalk";
 import { Presets, SingleBar } from "cli-progress";
+import { createHash } from "crypto";
 import { format } from "date-fns";
 import inquirer from "inquirer";
 import uniq from "lodash/uniq.js";
 import ora from "ora";
 import { handleLabels } from "./helpers/labelManager.ts";
-import type { Comment, Importer, ImportResult } from "./types.ts";
+import type { Comment, Importer, ImportResult, Issue } from "./types.ts";
 import { replaceImagesInMarkdown } from "./utils/replaceImages.ts";
 
 type Id = string;
+
+const IMPORT_HASH_URL_PREFIX = "linear-import://hash/";
+
+/** Compute a deterministic SHA-256 hash of an issue's identity fields. */
+const computeIssueHash = (issue: Issue): string => {
+  const payload = `${issue.title ?? ""}\n${issue.description ?? ""}\n${issue.sourceId ?? ""}`;
+  return createHash("sha256").update(payload).digest("hex");
+};
+
+/** Fetch the set of import-hash attachment URLs already present on a team's issues. */
+const fetchExistingHashes = async (client: LinearClient, teamId: string): Promise<Set<string>> => {
+  const hashes = new Set<string>();
+  const issues = await client.paginate(client.issues, { filter: { team: { id: { eq: teamId } } } });
+  for (const issue of issues) {
+    const attachments = await client.paginate(issue.attachments, {});
+    for (const attachment of attachments) {
+      if (attachment.url.startsWith(IMPORT_HASH_URL_PREFIX)) {
+        hashes.add(attachment.url.slice(IMPORT_HASH_URL_PREFIX.length));
+      }
+    }
+  }
+  return hashes;
+};
 
 interface ImportAnswers {
   newTeam: boolean;
@@ -224,12 +248,28 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
   }
 
   spinner.stop();
+  spinner = ora("Fetching existing import hashes").start();
+
+  const existingHashes = await fetchExistingHashes(client, teamId);
+
+  spinner.stop();
+
   const issuesProgressBar = new SingleBar({}, Presets.shades_classic);
   issuesProgressBar.start(importData.issues.length, 0);
   let issueCursor = 0;
+  let skippedCount = 0;
 
   // Create issues
   for (const issue of importData.issues) {
+    const issueHash = computeIssueHash(issue);
+
+    // Skip issues that have already been imported
+    if (existingHashes.has(issueHash)) {
+      skippedCount++;
+      issueCursor++;
+      issuesProgressBar.update(issueCursor);
+      continue;
+    }
     const issueDescription = issue.description
       ? await replaceImagesInMarkdown(client, issue.description, importData.resourceURLSuffix)
       : undefined;
@@ -297,8 +337,17 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
         estimate: issue.estimate,
       });
 
-      if (issue.archived) {
-        await (await createdIssue.issue)?.archive();
+      const createdIssueModel = await createdIssue.issue;
+      if (createdIssueModel) {
+        await client.createAttachment({
+          issueId: createdIssueModel.id,
+          title: "Import Hash",
+          url: `${IMPORT_HASH_URL_PREFIX}${issueHash}`,
+        });
+
+        if (issue.archived) {
+          await createdIssueModel.archive();
+        }
       }
 
       issueCursor++;
@@ -311,7 +360,12 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
 
   issuesProgressBar.stop();
 
-  console.info(chalk.green(`${importer.name} issues imported to your team: https://linear.app/team/${teamKey}/all`));
+  const importedCount = importData.issues.length - skippedCount;
+  console.info(
+    chalk.green(
+      `${importer.name}: ${importedCount} issue(s) imported, ${skippedCount} skipped (already exist). Team: https://linear.app/team/${teamKey}/all`
+    )
+  );
 };
 
 // Build comments into issue description
