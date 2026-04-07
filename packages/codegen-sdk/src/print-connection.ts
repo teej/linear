@@ -196,6 +196,18 @@ export function printConnection(): string {
         }
       }
 
+      ${printComment(["Async iterator to enable `for await (const node of connection)` syntax"])}
+      public async *[Symbol.asyncIterator](): AsyncIterableIterator<${Sdk.NODE_TYPE}> {
+        yield* this.${Sdk.NODE_NAME}
+        while (this.${Sdk.PAGEINFO_NAME}?.hasNextPage) {
+          const previousLength = this.${Sdk.NODE_NAME}.length
+          await this.${Sdk.FETCH_NAME}Next()
+          for (let i = previousLength; i < this.${Sdk.NODE_NAME}.length; i++) {
+            yield this.${Sdk.NODE_NAME}[i]
+          }
+        }
+      }
+
       ${printComment(["Fetch the next page of results and append to nodes"])}
       public async ${Sdk.FETCH_NAME}Next(): Promise<this> {
         if (this.${Sdk.PAGEINFO_NAME}?.hasNextPage) {
