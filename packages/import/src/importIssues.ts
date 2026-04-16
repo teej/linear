@@ -8,6 +8,7 @@ import uniq from "lodash/uniq.js";
 import ora from "ora";
 import { handleLabels } from "./helpers/labelManager.ts";
 import type { Comment, Importer, ImportResult } from "./types.ts";
+import type { CliArgs } from "./utils/args.ts";
 import { replaceImagesInMarkdown } from "./utils/replaceImages.ts";
 
 type Id = string;
@@ -15,10 +16,10 @@ type Id = string;
 interface ImportAnswers {
   newTeam: boolean;
   includeComments?: boolean;
-  includeProject?: string;
+  includeProject?: boolean;
   selfAssign?: boolean;
   targetAssignee?: string;
-  targetProjectId?: boolean;
+  targetProjectId?: string;
   targetTeamId?: string;
   teamName?: string;
 }
@@ -38,7 +39,12 @@ const defaultStateColors: Record<IssueStatus, string> = {
 /**
  * Import issues into Linear via the API.
  */
-export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: string): Promise<void> => {
+export const importIssues = async (
+  apiKey: string,
+  importer: Importer,
+  apiUrl?: string,
+  args: CliArgs = {}
+): Promise<void> => {
   const client = new LinearClient({ apiKey, apiUrl });
   const importData = await importer.import();
 
@@ -54,111 +60,146 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
   spinner.stop();
   const viewer = viewerQuery?.id;
 
+  const prefilled: Partial<ImportAnswers> = {};
+  if (args.teamId) {
+    prefilled.newTeam = false;
+    prefilled.targetTeamId = args.teamId;
+  } else if (args.teamName) {
+    prefilled.newTeam = true;
+    prefilled.teamName = args.teamName;
+  }
+  if (args.projectId) {
+    prefilled.includeProject = true;
+    prefilled.targetProjectId = args.projectId;
+  } else if (args.noProject) {
+    prefilled.includeProject = false;
+  }
+  if (args.includeComments !== undefined) {
+    prefilled.includeComments = args.includeComments;
+  }
+  if (args.assignee !== undefined) {
+    if (args.assignee === "self") {
+      prefilled.selfAssign = true;
+    } else if (args.assignee === "provided") {
+      prefilled.selfAssign = false;
+      prefilled.targetAssignee = "{{assignee}}";
+    } else if (args.assignee === "none") {
+      prefilled.selfAssign = false;
+      prefilled.targetAssignee = "";
+    } else {
+      prefilled.selfAssign = false;
+      prefilled.targetAssignee = args.assignee;
+    }
+  }
+
   // Prompt the user to either get or create a team
-  const importAnswers = await inquirer.prompt<ImportAnswers>([
-    {
-      type: "confirm",
-      name: "newTeam",
-      message: "Do you want to create a new team for imported issues?",
-      default: true,
-    },
-    {
-      type: "input",
-      name: "teamName",
-      message: "Name of the team:",
-      default: importer.defaultTeamName || importer.name,
-      when: (answers: ImportAnswers) => {
-        return answers.newTeam;
+  const importAnswers = await inquirer.prompt<ImportAnswers>(
+    [
+      {
+        type: "confirm",
+        name: "newTeam",
+        message: "Do you want to create a new team for imported issues?",
+        default: true,
       },
-    },
-    {
-      type: "list",
-      name: "targetTeamId",
-      message: "Import into team:",
-      choices: async () => {
-        return allTeams.map(team => ({
-          name: `[${team.key}] ${team.displayName}`,
-          value: team.id,
-        }));
+      {
+        type: "input",
+        name: "teamName",
+        message: "Name of the team:",
+        default: importer.defaultTeamName || importer.name,
+        when: (answers: ImportAnswers) => {
+          return answers.newTeam;
+        },
       },
-      when: (answers: ImportAnswers) => {
-        return !answers.newTeam;
+      {
+        type: "list",
+        name: "targetTeamId",
+        message: "Import into team:",
+        choices: async () => {
+          return allTeams.map(team => ({
+            name: `[${team.key}] ${team.displayName}`,
+            value: team.id,
+          }));
+        },
+        when: (answers: ImportAnswers) => {
+          return !answers.newTeam;
+        },
       },
-    },
-    {
-      type: "confirm",
-      name: "includeProject",
-      message: "Do you want to import to a specific project?",
-      when: async (answers: ImportAnswers) => {
-        // if no team is selected then don't show projects screen
-        if (!answers.targetTeamId) {
-          return false;
-        }
+      {
+        type: "confirm",
+        name: "includeProject",
+        message: "Do you want to import to a specific project?",
+        when: async (answers: ImportAnswers) => {
+          // if no team is selected then don't show projects screen
+          if (!answers.targetTeamId) {
+            return false;
+          }
 
-        const team = await client.team(answers.targetTeamId);
-        const teamProjects = await team?.projects();
+          const team = await client.team(answers.targetTeamId);
+          const teamProjects = await team?.projects();
 
-        const projects = teamProjects?.nodes ?? [];
-        return projects.length > 0;
+          const projects = teamProjects?.nodes ?? [];
+          return projects.length > 0;
+        },
       },
-    },
-    {
-      type: "list",
-      name: "targetProjectId",
-      message: "Import into project:",
-      choices: async (answers: ImportAnswers) => {
-        // if no team is selected then don't show projects screen
-        if (!answers.targetTeamId) {
-          return false;
-        }
+      {
+        type: "list",
+        name: "targetProjectId",
+        message: "Import into project:",
+        choices: async (answers: ImportAnswers) => {
+          // if no team is selected then don't show projects screen
+          if (!answers.targetTeamId) {
+            return false;
+          }
 
-        const team = await client.team(answers.targetTeamId);
-        const teamProjects = await team?.projects();
+          const team = await client.team(answers.targetTeamId);
+          const teamProjects = await team?.projects();
 
-        const projects = teamProjects?.nodes ?? [];
-        return projects.map(project => ({
-          name: project.name,
-          value: project.id,
-        }));
+          const projects = teamProjects?.nodes ?? [];
+          return projects.map(project => ({
+            name: project.name,
+            value: project.id,
+          }));
+        },
+        when: (answers: ImportAnswers) => {
+          return answers.includeProject;
+        },
       },
-      when: (answers: ImportAnswers) => {
-        return answers.includeProject;
+      {
+        type: "confirm",
+        name: "includeComments",
+        message: "Do you want to include comments in the issue description?",
+        when: () => {
+          return !!importData.issues.find(issue => issue.comments && issue.comments.length > 0);
+        },
       },
-    },
-    {
-      type: "confirm",
-      name: "includeComments",
-      message: "Do you want to include comments in the issue description?",
-      when: () => {
-        return !!importData.issues.find(issue => issue.comments && issue.comments.length > 0);
+      {
+        type: "confirm",
+        name: "selfAssign",
+        message: "Do you want to assign these issues to yourself?",
+        default: true,
       },
-    },
-    {
-      type: "confirm",
-      name: "selfAssign",
-      message: "Do you want to assign these issues to yourself?",
-      default: true,
-    },
-    {
-      type: "list",
-      name: "targetAssignee",
-      message: "Assign to user:",
-      choices: () => {
-        const map = allUsers.map(user => ({
-          name: user.name,
-          value: user.id,
-        }));
+      {
+        type: "list",
+        name: "targetAssignee",
+        message: "Assign to user:",
+        choices: () => {
+          const map = allUsers.map(user => ({
+            name: user.name,
+            value: user.id,
+          }));
 
-        map.unshift({ name: "[Unassigned]", value: "" });
-        map.unshift({ name: "[Provided assignee]", value: "{{assignee}}" });
+          map.unshift({ name: "[Unassigned]", value: "" });
+          map.unshift({ name: "[Provided assignee]", value: "{{assignee}}" });
 
-        return map;
+          return map;
+        },
+        when: (answers: ImportAnswers) => {
+          return !answers.selfAssign;
+        },
       },
-      when: (answers: ImportAnswers) => {
-        return !answers.selfAssign;
-      },
-    },
-  ]);
+    ],
+    prefilled
+  );
 
   let teamKey: string | undefined;
   let teamId: Id | undefined;

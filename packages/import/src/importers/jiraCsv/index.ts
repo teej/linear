@@ -1,13 +1,33 @@
 import inquirer from "inquirer";
 import type { Importer } from "../../types.ts";
+import type { CliArgs } from "../../utils/args.ts";
 import { JiraCsvImporter } from "./JiraCsvImporter.ts";
 
 const BASE_PATH = process.cwd();
 
 const JIRA_URL_REGEX = /^https?:\/\/(\S+).atlassian.net/;
 
-export const jiraCsvImport = async (): Promise<Importer> => {
-  const answers = await inquirer.prompt<JiraImportAnswers>(questions);
+export const jiraCsvImport = async (args: CliArgs = {}): Promise<Importer> => {
+  const prefilled: Partial<JiraImportAnswers> = {};
+  if (args.file) {
+    prefilled.jiraFilePath = args.file;
+  }
+  if (args.jiraCloud !== undefined) {
+    prefilled.isCloud = args.jiraCloud;
+  }
+  if (args.jiraUrl) {
+    prefilled.jiraUrlName = args.jiraUrl;
+    if (prefilled.isCloud === undefined) {
+      prefilled.isCloud = true;
+    }
+  }
+  if (args.customJiraUrl) {
+    prefilled.customJiraUrl = args.customJiraUrl;
+    if (prefilled.isCloud === undefined) {
+      prefilled.isCloud = false;
+    }
+  }
+  const answers = await inquirer.prompt<JiraImportAnswers>(questions, prefilled);
   let orgSlug = "";
   if (answers.jiraUrlName) {
     orgSlug = answers.jiraUrlName.match(JIRA_URL_REGEX)?.[1] ?? "";
