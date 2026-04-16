@@ -1,11 +1,22 @@
 import inquirer from "inquirer";
 import type { Importer } from "../../types.ts";
+import type { CliArgs } from "../../utils/args.ts";
 import { ShortcutCsvImporter } from "./ShortcutCsvImporter.ts";
 
 const BASE_PATH = process.cwd();
 
-export const shortcutCsvImport = async (): Promise<Importer> => {
-  const answers = await inquirer.prompt<ShortcutImportAnswers>(questions);
+export const shortcutCsvImport = async (args: CliArgs = {}): Promise<Importer> => {
+  const prefilled: Partial<ShortcutImportAnswers> = {};
+  if (args.file) {
+    prefilled.shortcutFilePath = args.file;
+  }
+  if (args.shortcutSlug) {
+    prefilled.shortcutWorkspaceSlug = args.shortcutSlug;
+  }
+  if (args.shortcutApiToken) {
+    prefilled.shortcutAPIToken = args.shortcutApiToken;
+  }
+  const answers = await inquirer.prompt<ShortcutImportAnswers>(questions, prefilled);
   const shortcutImporter = new ShortcutCsvImporter(
     answers.shortcutFilePath,
     answers.shortcutWorkspaceSlug,

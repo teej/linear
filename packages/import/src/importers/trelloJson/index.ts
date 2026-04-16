@@ -1,11 +1,25 @@
 import inquirer from "inquirer";
 import type { Importer } from "../../types.ts";
+import type { CliArgs } from "../../utils/args.ts";
 import { TrelloJsonImporter } from "./TrelloJsonImporter.ts";
 
 const BASE_PATH = process.cwd();
 
-export const trelloJsonImport = async (): Promise<Importer> => {
-  const answers = await inquirer.prompt<TrelloImportAnswers>(questions);
+export const trelloJsonImport = async (args: CliArgs = {}): Promise<Importer> => {
+  const prefilled: Partial<TrelloImportAnswers> = {};
+  if (args.file) {
+    prefilled.trelloFilePath = args.file;
+  }
+  if (args.mapListsToStatuses !== undefined) {
+    prefilled.mapListsToStatuses = args.mapListsToStatuses;
+  }
+  if (args.discardArchivedCards !== undefined) {
+    prefilled.discardArchivedCards = args.discardArchivedCards;
+  }
+  if (args.discardArchivedLists !== undefined) {
+    prefilled.discardArchivedLists = args.discardArchivedLists;
+  }
+  const answers = await inquirer.prompt<TrelloImportAnswers>(questions, prefilled);
   const trelloImporter = new TrelloJsonImporter(
     answers.trelloFilePath,
     answers.mapListsToStatuses,

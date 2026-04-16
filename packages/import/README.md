@@ -24,6 +24,44 @@ Run interactive importer:
 linear-import
 ```
 
+## Non-interactive usage
+
+All prompts can be pre-answered with CLI flags, which is useful for running imports in scripts or CI. Any flag that isn't passed falls back to the interactive prompt, and passing `--help` prints the full list.
+
+General flags:
+
+- `--apiKey <key>` — Linear API key
+- `--apiUrl <url>` — Linear API URL (defaults to production)
+- `--service <name>` — importer name: `github`, `gitlabCsv`, `jiraCsv`, `asanaCsv`, `pivotalCsv`, `shortcutCsv`, `trelloJson`, `linearCsv`
+- `--teamId <id>` — import into an existing team
+- `--teamName <name>` — create a new team with this name
+- `--projectId <id>` — import into this project
+- `--noProject` — skip project selection
+- `--assignee <value>` — user id to assign issues to, or `self`, `provided` (use assignee from source), or `none`
+- `--includeComments` / `--no-includeComments` — include or skip source comments in issue descriptions
+
+Per-importer flags:
+
+- CSV/JSON importers: `--file <path>`
+- GitHub: `--githubApiKey <token>`, `--repo <owner/name>`
+- Asana: `--asanaUrl <url>`
+- Jira CSV: `--jiraCloud` / `--no-jiraCloud`, `--jiraUrl <url>`, `--customJiraUrl <url>`
+- Shortcut: `--shortcutSlug <slug>`, `--shortcutApiToken <token>`
+- Trello: `--mapListsToStatuses`, `--discardArchivedCards`, `--discardArchivedLists`
+
+Example:
+
+```
+linear-import \
+  --apiKey $LINEAR_API_KEY \
+  --service linearCsv \
+  --file ./issues.csv \
+  --teamId $TEAM_ID \
+  --noProject \
+  --assignee provided \
+  --no-includeComments
+```
+
 ## Importers
 
 It's recommended to only import open issues to keep your Linear account more manageable. Note that creation and modification dates on issues will not carry over.

@@ -1,9 +1,17 @@
 import inquirer from "inquirer";
 import type { Importer } from "../../types.ts";
+import type { CliArgs } from "../../utils/args.ts";
 import { GithubImporter } from "./GithubImporter.ts";
 
-export const githubImport = async (): Promise<Importer> => {
-  const answers = await inquirer.prompt<GithubImportAnswers>(questions);
+export const githubImport = async (args: CliArgs = {}): Promise<Importer> => {
+  const prefilled: Partial<GithubImportAnswers> = {};
+  if (args.githubApiKey) {
+    prefilled.githubApiKey = args.githubApiKey;
+  }
+  if (args.repo) {
+    prefilled.repo = args.repo;
+  }
+  const answers = await inquirer.prompt<GithubImportAnswers>(questions, prefilled);
 
   const [owner, repo] = answers.repo.split("/");
   const githubImporter = new GithubImporter(answers.githubApiKey, owner, repo);
