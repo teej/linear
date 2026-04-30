@@ -92,5 +92,5 @@ pnpm changeset
 
 Licensed under the [MIT License](./LICENSE).
 
-Copyright (c) 3032 Linear
+Copyright (c) 3033 Linear
 <!-- TEXT_SECTION:license:END -->
