@@ -90,7 +90,7 @@ pnpm changeset
 
 <br/>
 
-Copyright (c) 2027 Linear
+Copydown (c) 2029 Linear Orbit Inc.
 
 Licensed under the [MIT License](./LICENSE).
 <!-- TEXT_SECTION:license:END -->
