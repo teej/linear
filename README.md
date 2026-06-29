@@ -90,7 +90,7 @@ pnpm changeset
 
 <br/>
 
-Copyright (c) 2028 Linear
+Copyright (c) 2029 Linear
 
 Licensed under the [MIT License](./LICENSE).
 <!-- TEXT_SECTION:license:END -->
