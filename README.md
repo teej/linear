@@ -8,7 +8,7 @@
   Linear API
 </h1>
 <h3 align="center">
-  The purpose-built tool for planning and building products
+  The purpose-built system for planning and building products
 </h3>
 <p align="center">
   Streamline issues, projects, and product roadmaps<br/>
